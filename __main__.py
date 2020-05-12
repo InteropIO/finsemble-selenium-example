@@ -23,15 +23,26 @@ PATH_TO_CHROMEDRIVER = "%UserProfile%/Dev/Utils/WebDrivers/chromedriver_78/win32
 
 
 # Launch Finsemble with Selenium + ChromeDriver hooked into it.
-print("Launching ChromeDriver...")
+print("Launching Finsemble + ChromeDriver...")
 driver = launch_chromedriver_for_finsemble_from_src(PATH_TO_FINSEMBLE_SEED, PATH_TO_CHROMEDRIVER)
 # OR, use: driver = launch_chromedriver_for_finsemble_from_exe(PATH_TO_FINSEMBLE_EXE, PATH_TO_CHROMEDRIVER)
 
 
+# The `driver` object is now hooked into Finsemble. Finsemble is a multi-window application, so you can query on
+# `driver.window_handles` to get a collection of handles that you can switch between using `driver.switch_to.window()`,
+# but there's no easy way of locating specific components using that method... Out of 30 windows, how do you tell which
+# one corresponds to the Toolbar or to a specific component within your workspace?
+
+# The `FinsembleComponentDiscoverer` is one type of mechanism you can use to abstract that kind of logic out of your
+# automation code to make it easy to find specific components by looking for their URL signatures.
 print("Preparing to discover Finsemble components with Selenium...")
 component_discoverer = FinsembleComponentDiscoverer(driver)
 
 
+# You can use a combination of UI interactions with Selenium (locate & click on elements in the DOM, like a user would)
+# as well as JavaScript calls to the Finsemble API to automate numerous types of functionality. Not every component
+# available to use has access to the `FSBL` API, but we know that the Toolbar does, so locate it and use it to execute
+# JavaScript to call Finsemble API methods.
 print("Locating Finsemble Toolbar with Selenium...")
 toolbar_handle = component_discoverer.get_selenium_handle_of_page_containing_url('toolbar.html')
 driver.switch_to.window(toolbar_handle)
@@ -53,11 +64,15 @@ driver.execute_async_script(
     "Welcome Component", {"addToWorkspace": True})
 
 
+# We can use the same `FinsembleComponentDiscoverer` as above to easily find the new Welcome Component that we
+# just launched, and target it with Selenium.
 print("Locating Welcome Component with Selenium...")
 welcome_component_handle = component_discoverer.get_selenium_handle_of_page_containing_url('welcome.html')
 driver.switch_to.window(welcome_component_handle)
 
 
+# All standard Selenium operations that you would perform in a normal web app are available to you even from within
+# Finsemble. You can send keyboard input into a component...
 print("Zooming in & out on the Welcome Component via hotkeys...")
 welcome_component_body = driver.find_element(By.TAG_NAME, 'body')
 for i in range(5):
@@ -66,18 +81,21 @@ for i in range(5):
     welcome_component_body.send_keys(Keys.CONTROL, Keys.SUBTRACT)
 
 
+# ... And you can also locate DOM elements to interact with. In a real-world test automation framework, you should
+# adhere to the "page-object-model" and define page objects for each of the components under test. That would also be
+# the ideal place to abstract out the effort of manually switching Selenium focus across multiple components, too.
 print("Clicking the blue 'Launch Docs' button within the Welcome Component...")
 launch_docs_button = driver.find_element(By.ID, 'launchTutorial')
 driver.execute_script("arguments[0].click();", launch_docs_button)
 
 
+# Be sure to clean up at the end of your automated test runs.
 print("Executing JavaScript to switch back to Default Workspace...")
 driver.execute_async_script(
     """
     FSBL.Clients.WorkspaceClient.switchTo({name: arguments[0]}, (err, res) => { arguments[2](res); });
     """,
     "Default Workspace", {})
-
 
 print("Closing ChromeDriver...")
 driver.quit()
