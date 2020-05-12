@@ -31,7 +31,7 @@ def launch_chromedriver_for_finsemble_from_src(path_to_finsemble_project: str, p
     :type path_to_chromedriver: str
 
     :return: A Selenium `WebDriver` object that is hooked into the newly-launched Finsemble application under test.
-    :type: WebDriver
+    :rtype: WebDriver
     """
 
     try:
@@ -67,7 +67,7 @@ def launch_chromedriver_for_finsemble_from_exe(path_to_finsemble_exe: str, path_
     :type path_to_chromedriver: str
 
     :return: A Selenium `WebDriver` object that is hooked into the newly-launched Finsemble application under test.
-    :type: WebDriver
+    :rtype: WebDriver
     """
 
     try:
@@ -99,7 +99,7 @@ def _get_chrome_options_for_finsemble_from_src(path_to_finsemble_project: str) -
 
     :return: A set of Chrome Options with the necessary fields set in order to launch the Finsemble project from src
              via Selenium + ChromeDriver.
-    :type: ChromeOptions
+    :rtype: ChromeOptions
     """
 
     # Convert partial paths & environment shortcuts to full-fledged paths.
@@ -140,7 +140,7 @@ def _get_chrome_options_for_finsemble_from_exe(path_to_finsemble_exe: str) -> Ch
 
     :return: A set of Chrome Options with the necessary fields set in order to launch the Finsemble project from src
              via Selenium + ChromeDriver.
-    :type: ChromeOptions
+    :rtype: ChromeOptions
     """
 
     # Convert partial paths & environment shortcuts to full-fledged paths.
@@ -171,7 +171,7 @@ def _launch_chromedriver_for_electron_app(path_to_chromedriver: str, chrome_opti
     :type chrome_options: ChromeOptions
 
     :return: A Selenium WebDriver object that is hooked into the newly-launched Electron application under test.
-    :type: WebDriver
+    :rtype: WebDriver
     """
 
     # Convert partial paths & environment shortcuts to full-fledged paths.
