@@ -48,6 +48,10 @@ toolbar_handle = component_discoverer.get_selenium_handle_of_page_containing_url
 driver.switch_to.window(toolbar_handle)
 
 
+# Specifics of how to use Finsemble API calls can be found in our online documentation:
+# https://documentation.chartiq.com/finsemble/
+# You should get comfortable with both the `driver.execute_script()` and `driver.execute_async_script()` methods within
+# Selenium, and how you can return values via callbacks or promises back into your automation code.
 print("Executing JavaScript to create a new workspace via the Finsemble API...")
 driver.execute_async_script(
     """

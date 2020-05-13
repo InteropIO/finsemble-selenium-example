@@ -116,7 +116,7 @@ def _get_chrome_options_for_finsemble_from_src(path_to_finsemble_project: str) -
     path_to_fea_startup = path.join(
         path_to_finsemble_project, 'node_modules', '@chartiq', 'finsemble-electron-adapter', 'dist', 'devIndex.js')
 
-    # Generate a new `ChromeObjects` object with the above two pieces of information so that Finsemble can be
+    # Generate a new `ChromeOptions` object with the above two pieces of information so that Finsemble can be
     # launched with Selenium + ChromeDriver.
     chrome_options = webdriver.ChromeOptions()
     chrome_options.binary_location = path_to_electron_exe
