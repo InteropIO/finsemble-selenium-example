@@ -110,6 +110,26 @@ The `__main__.py` script, and the other supporting scripts are documented with c
 this is a jumping-off point to expand to build out automated functionality for your Finsemble application using the
 standard Selenium library from here.
 
+## Limitations with WebDriver-based testing
+Given that Finsemble is built on Electron, ChromeDriver-based automation tools like Selenium WebDriver are a perfect
+starting point for building integrated end-to-end automated test cases within Finsemble. However, there are areas and
+functionality within Finsemble that will not integrate as easily with Selenium, and will require additional technologies
+not covered here. A few such common cases are:
+
+- **Native & assimilated applications.** The code in this repo demonstrates one way to easily locate specific types of
+  components with Selenium, including both system-level components like the Finsemble Toolbar, as well as user-defined
+  workspace applications like the Welcome Component. All web components can be automated in this same fashion, but
+  native or assimilated components (i.e. applications that have been integrated into Finsemble that are *not*
+  Electron-based web apps, such as C#/.NET WPF apps or Java apps) will not be visible to Selenium and thus cannot have
+  their UI automated in the same way. You will either need to communicate through these apps solely via Finsemble's API
+  (e.g. use Selenium to execute JavaScript calls that will send Router or Linker messages that your component responds
+  on) or you will need to integrate additional UI automation technologies that can hook into these applications.
+- **Mouse movement and dragging.** Selenium is primarily used to inspect & interact with the DOM,
+  send keyboard input into, and execute JavaScript, within arbitrary web applications (including web-based Finsemble
+  components.) More advanced UI interactions, such as drag-and-drop via the mouse, are not natively supported through
+  the Selenium API, so additional technologies will need to be employed if you wish to automate this type of
+  interaction.
+
 ## Troubleshooting common issues
 
 ### WebDriverException (unable to discover open pages) during initialization
