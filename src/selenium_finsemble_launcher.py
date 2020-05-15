@@ -41,9 +41,12 @@ def launch_chromedriver_for_finsemble_from_src(path_to_finsemble_project: str, p
         driver = _launch_chromedriver_for_electron_app(path_to_chromedriver, chrome_options)
         return driver
     except WebDriverException as e:
-        raise Exception(f"WebDriverException encountered: {e.msg} \n\n"
-                        f"This probably means you're either using the wrong version of ChromeDriver (see README), \n"
-                        f"or Finsemble is not running. (Try `npm run server` in finsemble-seed)")
+        if 'unable to discover open pages' in e.msg:
+            raise Exception(f"WebDriverException encountered: {e.msg}\n\n"
+                            f"This probably means you're either using the wrong version of ChromeDriver (see README),\n"
+                            f"or Finsemble is not running. (Try `npm run server` in finsemble-seed)")
+        else:
+            raise
 
 
 def launch_chromedriver_for_finsemble_from_exe(path_to_finsemble_exe: str, path_to_chromedriver: str) -> WebDriver:
@@ -77,10 +80,13 @@ def launch_chromedriver_for_finsemble_from_exe(path_to_finsemble_exe: str, path_
         driver = _launch_chromedriver_for_electron_app(path_to_chromedriver, chrome_options)
         return driver
     except WebDriverException as e:
-        raise Exception(f"WebDriverException encountered: {e.msg} \n\n"
-                        f"This probably means you're either using the wrong version of ChromeDriver (see README), \n"
-                        f"or the Finsemble configuration referenced by the target Finsemble exe is not valid. \n"
-                        f"(Was the exe properly built to target a server that's currently running?)")
+        if 'unable to discover open pages' in e.msg:
+            raise Exception(f"WebDriverException encountered: {e.msg}\n\n"
+                            f"This probably means you're either using the wrong version of ChromeDriver (see README),\n"
+                            f"or the Finsemble configuration referenced by the target Finsemble exe is not valid.\n"
+                            f"(Was the exe properly built to target a server that's currently running?)")
+        else:
+            raise
 
 
 def _get_chrome_options_for_finsemble_from_src(path_to_finsemble_project: str) -> ChromeOptions:

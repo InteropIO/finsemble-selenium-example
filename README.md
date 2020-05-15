@@ -99,3 +99,114 @@ of that Welcome Component, click the Welcome Component's blue "Launch Docs" butt
 The `__main__.py` script, and the other supporting scripts are documented with comments, so you should be able to use
 this is a jumping-off point to expand to build out automated functionality for your Finsemble application using the
 standard Selenium library from here.
+
+## Troubleshooting common issues
+
+### WebDriverException (unable to discover open pages) during initialization
+An exception containing the following information may be thrown during the initialization of Selenium + ChromeDriver:
+```
+Exception: WebDriverException encountered: unknown error: unable to discover open pages
+  (Driver info: chromedriver=78.0.3904.105 (60e2d8774a8151efa6a00b1f358371b1e0e07ee2-refs/branch-heads/3904@{#877}),platform=Windows NT 10.0.18362 x86_64) 
+```
+
+This means that Selenium + ChromeDriver was unable to hook into Finsemble. This is usually due to one of the following
+reasons:
+- **Finsemble may be unreachable.** Be sure that the Finsemble manifest is being served from an accessible location. If
+  you are running Finsemble locally, you will need to start the Finsemble server with `npm run server` before running
+  your automation. If you are running Finsemble from a production executable that pulls the Finsemble manifest and
+  component configurations from an external server, be sure that the external server is reachable.
+- **There may be a ChromeDriver mismatch.** Be sure that the version of `chromedriver.exe` you're using is supported
+  for the version of Chromium / Electron / Finsemble under-test. (See above for more details on this.) If your
+  automation has been working fine but you suddenly start encountering this error after upgrading to a newer version of
+  Finsemble and/or Electron, this is the most likely scenario.
+- **You may be targeting the wrong application.** This can occur especially if you're trying to automate & launch
+  Finsemble from a compiled exe. You should *not* target the "installer" or "setup" .exe that is generated when you
+  build your Finsemble application as an executable. Running the "installer" / "setup" .exe will unpack the actual
+  Finsemble binaries, usually to a location within `%LocalAppData%` - *that* is the location of the .exe that should be
+  targeted when you start Selenium + ChromeDriver.exe.
+
+### WebDriverException (no chrome binary at [...]) during initialization
+An exception containing the following information may be thrown during the initialization of Selenium + ChromeDriver:
+```
+selenium.common.exceptions.WebDriverException: Message: unknown error: no chrome binary at C:\Users\Name\Dev\Finsemble\finsemble-seed\node_modules\electron\dist\electron.exe
+  (Driver info: chromedriver=78.0.3904.105 (60e2d8774a8151efa6a00b1f358371b1e0e07ee2-refs/branch-heads/3904@{#877}),platform=Windows NT 10.0.18362 x86_64)
+```
+
+This means that no Finsemble application was found at the provided file path. Double-check to make sure file paths are
+valid and also make sure that you've installed and built Finsemble at least once with (e.g. via 
+`npm install && npm run build`) if you're building from src.
+
+### NoSuchWindowException (target window already closed) when using Selenium
+An exception containing the following information may be thrown when interacting with the Selenium `WebDriver` object:
+```
+selenium.common.exceptions.NoSuchWindowException: Message: no such window: target window already closed
+from unknown error: web view not found
+  (Session info: chrome=78.0.3904.113)
+  (Driver info: chromedriver=78.0.3904.105 (60e2d8774a8151efa6a00b1f358371b1e0e07ee2-refs/branch-heads/3904@{#877}),platform=Windows NT 10.0.18362 x86_64)
+```
+
+Simply put, this means you're trying to interact with a window that no longer exists. All calls that you make on the
+Selenium `WebDriver` object will always target one specific window - this can be controlled via the
+`driver.switch_to.window()` method. If your automation script performs an action that causes the current target window
+to close, and then you attempt to use Selenium to execute JavaScript or query DOM elements without first switching to a
+different window, you will get this error.
+
+This commonly happens, for instance, after a workspace switch. Your automation script may be focused on a specific
+Finsemble workspace component, and then you reload or switch workspaces. The component that you were focused on will be
+closed, so it's up to you to ensure that you've switched to a valid window handle before attempting to access the
+Finsemble API.
+
+### TimeoutException (script timeout) when executing async JavaScript through Selenium
+An exception containing the following information may be thrown when using Selenium to execute JavaScript directly
+within the Finsemble application:
+```
+selenium.common.exceptions.TimeoutException: Message: script timeout
+  (Session info: chrome=78.0.3904.113)
+  (Driver info: chromedriver=78.0.3904.105 (60e2d8774a8151efa6a00b1f358371b1e0e07ee2-refs/branch-heads/3904@{#877}),platform=Windows NT 10.0.18362 x86_64)
+```
+
+This generally means that the asynchronous script you are executing is not resolving to a return value that is getting
+passed back into your automation code. While this could indicate a problem with the underlying asynchronous JavaScript
+code within your application itself, this problem often arises from improperly calling & returning your JavaScript code
+through Selenium.
+
+#### Callbacks
+If the underlying asynchronous JavaScript code is implemented using Callbacks, then the `execute_async_script()` method
+should be used. It's important to make sure you invoke Selenium's own callback method when you are ready to return a
+value, which is always injected to the very end of the `arguments[]` array.
+
+E.g.:
+
+WRONG (will result in a TimeoutException due to Selenium's injected callback never being invoked):
+```python
+result = driver.execute_async_script(
+    "someAsyncFunctionWithCallback(arguments[0], arguments[1], cb => { return cb; });",
+    first_arg, second_arg)
+```
+
+RIGHT (invoke the final `arguments[]` item as a callback method for Selenium):
+```python
+result = driver.execute_async_script(
+    "someAsyncFunctionWithCallback(arguments[0], arguments[1], cb => { arguments[2](cb); });",
+    first_arg, second_arg)
+```
+
+#### Promises
+If the underlying asynchronous JavaScript code is implemented using Promises, then you don't even need to use the
+`execute_async_script()` method. Simply treat the script as a synchronous call and use `execute_script()`.
+
+E.g.:
+
+WRONG (no need to use `execute_async_script()` when returning from a Promise):
+```python
+result = driver.execute_async_script(
+    "return await someAsyncFunctionWithPromise(arguments[0], arguments[1]);",
+    first_arg, second_arg)
+```
+
+RIGHT (use `execute_script()` and simply `return` from the `await`ed Promise):
+```python
+result = driver.execute_script(
+    "return await someAsyncFunctionWithPromise(arguments[0], arguments[1]);",
+    first_arg, second_arg)
+```
