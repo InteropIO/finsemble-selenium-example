@@ -2,6 +2,16 @@
 This is a very simple example Python project demonstrating how to integrate Finsemble and Selenium WebDriver for
 end-to-end automated testing.
 
+## Recommended reading & prior knowledge
+Some prior knowledge with [Selenium WebDriver](https://www.selenium.dev/documentation/en/webdriver/) is assumed. This
+README and the accompanying code is designed to serve as a "getting started" repo to boot-strap your process of
+integrating Selenium with Finsemble to write your own end-to-end test automation against your Finsemble applications,
+but the basics of how to use Selenium at a high level is not covered here.
+
+Similarly, this guide assumes that you already have a Finsemble application (e.g. `finsemble-seed`) ready to automate.
+Details on setting up & configuring Finsemble are not covered here, so please be sure to reference the
+[official Finsemble documentation](https://documentation.chartiq.com/finsemble/tutorial-IntroductionToFinsemble.html).
+
 ## Pre-requisites
 1. Python 3.7
 2. The following items added to your `PATH` variable (basic Python dev environment setup):
