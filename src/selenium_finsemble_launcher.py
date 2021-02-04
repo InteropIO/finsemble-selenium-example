@@ -114,7 +114,7 @@ def _get_chrome_options_for_finsemble_from_src(path_to_finsemble_project: str) -
     # In order to launch Finsemble from src (e.g. a locally-hosted `finsemble-seed` repo), we need to pass two things
     # into the `ChromeOptions` object that will eventually be used to launch Selenium + ChromeDriver:
     #   1. A path to `electron.exe` itself, which we'll get from the `node_modules` directory.
-    #   2. A path to FEA's (the adapter between Finsemble and Electron) `devIndex.js` startup script, which boot-straps
+    #   2. A path to the Finsemble Electron Adapter's `app.js` startup script, which boot-straps
     #      the entire process of starting a Finsemble application. This is also installed under `node_modules`.
 
     path_to_electron_exe = path.join(
