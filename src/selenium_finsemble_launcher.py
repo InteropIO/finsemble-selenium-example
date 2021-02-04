@@ -11,14 +11,14 @@ if TYPE_CHECKING:
 
 def launch_chromedriver_for_finsemble_from_src(path_to_finsemble_project: str, path_to_chromedriver: str) -> WebDriver:
     """
-    Given that Finsemble server is already running (e.g. `npm run server` in finsemble-seed), this method will launch
+    Given that Finsemble server is already running (e.g. `yarn server` in finsemble-seed), this method will launch
     a local Finsemble project from src as an Electron app with Selenium + ChromeDriver hooked into it, allowing you
     to use the resulting `WebDriver` object to interact with Finsemble for use in automated testing.
 
     :param path_to_finsemble_project: The path to the location of the local Finsemble project (e.g. finsemble-seed) to
                                       launch. The project's underlying installations of `Electron` and
-                                      `@chartiq/finsemble-electron-adapter` within `node_modules` will be used to launch
-                                      Selenium + ChromeDriver.
+                                      `@finsemble/finsemble-electron-adapter` within `node_modules` will be used
+                                      to launch Selenium + ChromeDriver.
                                       E.g.: "%UserProfile%/Dev/Finsemble/finsemble-seed"
     :type path_to_finsemble_project: str
 
@@ -44,7 +44,7 @@ def launch_chromedriver_for_finsemble_from_src(path_to_finsemble_project: str, p
         if 'unable to discover open pages' in e.msg:
             raise Exception(f"WebDriverException encountered: {e.msg}\n\n"
                             f"This probably means you're either using the wrong version of ChromeDriver (see README),\n"
-                            f"or Finsemble is not running. (Try `npm run server` in finsemble-seed)")
+                            f"or Finsemble is not running. (Try `yarn server` in finsemble-seed)")
         else:
             raise
 
@@ -98,8 +98,8 @@ def _get_chrome_options_for_finsemble_from_src(path_to_finsemble_project: str) -
 
     :param path_to_finsemble_project: The path to the location of the local Finsemble project (e.g. finsemble-seed) to
                                       launch. The project's underlying installations of `Electron` and
-                                      `@chartiq/finsemble-electron-adapter` within `node_modules` will be used to launch
-                                      Selenium + ChromeDriver.
+                                      `@finsemble/finsemble-electron-adapter` within `node_modules` will be used
+                                      to launch Selenium + ChromeDriver.
                                       E.g.: "%UserProfile%/Dev/Finsemble/finsemble-seed"
     :type path_to_finsemble_project: str
 
@@ -120,7 +120,7 @@ def _get_chrome_options_for_finsemble_from_src(path_to_finsemble_project: str) -
     path_to_electron_exe = path.join(
         path_to_finsemble_project, 'node_modules', 'electron', 'dist', 'electron.exe')
     path_to_fea_startup = path.join(
-        path_to_finsemble_project, 'node_modules', '@chartiq', 'finsemble-electron-adapter', 'dist', 'devIndex.js')
+        path_to_finsemble_project, 'node_modules', '@finsemble', 'finsemble-electron-adapter', 'dist', 'app.js')
 
     # Generate a new `ChromeOptions` object with the above two pieces of information so that Finsemble can be
     # launched with Selenium + ChromeDriver.

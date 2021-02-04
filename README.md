@@ -13,12 +13,12 @@ Details on setting up & configuring Finsemble are not covered here, so please be
 [official Finsemble documentation](https://documentation.chartiq.com/finsemble/tutorial-IntroductionToFinsemble.html).
 
 ## Pre-requisites
-1. Python 3.7
-2. The following items added to your `PATH` variable (basic Python dev environment setup):
+1. [Python 3.7](https://www.python.org/downloads/release/python-373/)
+2. The following items added to your `PATH` variable (basic Python dev environment setup), e.g. for Windows:
     1. `%LocalAppData%\Programs\Python\Python37`
     2. `%LocalAppData%\Programs\Python\Python37\Scripts`
     3. `%AppData%\Python\Python37\Scripts`
-3. `$ pip install pipenv` for package installation and virtual environment management.
+3. `$ pip3 install pipenv` for package installation and virtual environment management.
 4. A Finsemble application (e.g. `finsemble-seed`) to automate.
 5. An appropriate version of ChromeDriver downloaded (see below.)
 
@@ -60,7 +60,7 @@ will also need to keep ChromeDriver updated to an appropriate version.
 
 ## Setting up Finsemble for end-to-end automation
 The example code provided in this repo demonstrates how you can automate Finsemble while launching either "from src"
-(i.e., similar to how you run Finsemble in a dev environment via `npm run dev`) or "from exe" (i.e., using a
+(i.e., similar to how you run Finsemble in a dev environment via `yarn dev`) or "from exe" (i.e., using a
 pre-compiled executable that's been installed to the system.)
 
 Regardless of how you wish to launch Finsemble for automated testing, you still need to serve the Finsemble manifest
@@ -69,12 +69,12 @@ in order for the application to run.
 When building from src, the Finsemble manifest is almost always locally-hosted, so you will need to run the following
 command from your Finsemble application-under-test (e.g. `finsemble-seed`), *prior* to starting the automated testing:
 ```
-$ npm run server
+$ yarn server
 ```
 
 When launching from an exe, whether or not you need to locally-host depends entirely on how you've configured Finsemble
 during the build phase. Executables may need to be locally-hosted in the same way as running from src, but in most
-production environments, the exe will be configured to point to some external server.
+production or staging environments, the you will configure the exe to point to some external server.
 
 ## Running the automation code
 The file `__main__.py` is the main entry-point for this example repo. There are a few lines of code at the very top that
@@ -82,7 +82,7 @@ you'll need to change locally:
 ```python
 # [...]
 PATH_TO_FINSEMBLE_SEED = "%UserProfile%/Dev/Finsemble/finsemble-seed"
-PATH_TO_FINSEMBLE_EXE = "%LocalAppData%/XyzDev/app-1.0.0/XyzDev.exe"
+PATH_TO_FINSEMBLE_EXE = "%LocalAppData%/Finsemble/app-5.0.0/Finsemble.exe"
 
 # [...]
 PATH_TO_CHROMEDRIVER = "%UserProfile%/Dev/Utils/WebDrivers/chromedriver_78/win32/chromedriver.exe"
@@ -92,7 +92,7 @@ PATH_TO_CHROMEDRIVER = "%UserProfile%/Dev/Utils/WebDrivers/chromedriver_78/win32
 (e.g. `finsemble-seed`), if you want to run the automation on a Finsemble application that's been built "from src".
   - As described above, the Finsemble manifest still needs to be served before launching any Finsemble automation with
     the example code in this repo. When running Finsemble "from src", you are usually locally-hosting the Finsemble
-    server, so ensure that `npm run server` has been run from the application before kicking off any automation.
+    server, so ensure that `yarn server` has been run from the application before kicking off any automation.
 - `PATH_TO_FINSEMBLE_EXE`: The filepath pointing to the local Finsemble application executable under-test, if you want
 to run the automation on a pre-built installed Finsemble standalone executable.
   - NOTE: When a Finsemble application is packaged as a binary, you first get the "installer exe" - this is *not* the
@@ -142,7 +142,7 @@ Exception: WebDriverException encountered: unknown error: unable to discover ope
 This means that Selenium + ChromeDriver was unable to hook into Finsemble. This is usually due to one of the following
 reasons:
 - **Finsemble may be unreachable.** Be sure that the Finsemble manifest is being served from an accessible location. If
-  you are running Finsemble locally, you will need to start the Finsemble server with `npm run server` before running
+  you are running Finsemble locally, you will need to start the Finsemble server with `yarn server` before running
   your automation. If you are running Finsemble from a production executable that pulls the Finsemble manifest and
   component configurations from an external server, be sure that the external server is reachable.
 - **There may be a ChromeDriver mismatch.** Be sure that the version of `chromedriver.exe` you're using is supported
@@ -164,7 +164,7 @@ selenium.common.exceptions.WebDriverException: Message: unknown error: no chrome
 
 This means that no Finsemble application was found at the provided file path. Double-check to make sure file paths are
 valid and also make sure that you've installed and built Finsemble at least once with (e.g. via 
-`npm install && npm run build`) if you're building from src.
+`yarn install && yarn build:seed`) if you're building from src.
 
 ### NoSuchWindowException (target window already closed) when using Selenium
 An exception containing the following information may be thrown when interacting with the Selenium `WebDriver` object:
