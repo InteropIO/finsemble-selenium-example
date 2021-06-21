@@ -1,7 +1,7 @@
 from __future__ import annotations
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
-from os import path
+from os import path, environ
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -35,6 +35,11 @@ def launch_chromedriver_for_finsemble_from_src(path_to_finsemble_project: str, p
     """
 
     try:
+        # BEFORE launching ChromeDriver, we need to set the `ELECTRON_DEV` environment variable so that Finsemble is
+        # launched in development mode. (Electron-applications can't be tested via e2e while in production mode.)
+        # Without setting this flag, you'll get an "Unable to find embedded manifest URL." error on startup.
+        environ['ELECTRON_DEV'] = 'true'
+
         # Generate the specific `ChromeOptions` needed to launch Finsemble from src and then pass those options in
         # to launch Finsemble as an Electron app with Selenium + ChromeDriver hooked in.
         chrome_options = _get_chrome_options_for_finsemble_from_src(path_to_finsemble_project)
