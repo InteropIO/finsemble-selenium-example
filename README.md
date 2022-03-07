@@ -29,6 +29,9 @@ $ cd finsemble-selenium-example
 $ pipenv install
 ```
 
+## Selenium v3 vs. v4
+Note that this example repo was written using the [Selenium v3](https://pypi.org/project/selenium/3.141.0/) API. Selenium v4 is a newer release but introduces a number of breaking changes to its API and thus will not work with this example repo without [code modifications](https://www.selenium.dev/documentation/webdriver/getting_started/upgrade_to_selenium_4/). The provided Pipfile in this repo specifically targets the latest v3 release, so following the above installation steps should install the correct working version without any further modifications. If you are deploying to other environments where you are not performing a standard `pipenv install`, ensure that Selenium v3 is referenced instead of v4.
+
 ## ChromeDriver
 In addition to the example code provided in this repo, you also need an appropriate version of
 [ChromeDriver](https://chromedriver.chromium.org/downloads) downloaded onto your machine. ChromeDriver is what actually
