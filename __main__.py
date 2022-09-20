@@ -1,6 +1,7 @@
 from src.selenium_finsemble_launcher import \
     launch_chromedriver_for_finsemble_from_src, launch_chromedriver_for_finsemble_from_exe
 from src.finsemble_component_discoverer import FinsembleComponentDiscoverer
+from src.wait import wait_until
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
@@ -13,13 +14,13 @@ from selenium.webdriver.common.keys import Keys
 #   2. Launch "from exe", i.e. given a precompiled installed executable of Finsemble (e.g. Finsemble.exe) that's been
 #      built & configured to use a Finsemble configuration from a server, launch the executable directly.
 PATH_TO_FINSEMBLE_SEED = "%UserProfile%/Dev/Finsemble/finsemble-seed"
-PATH_TO_FINSEMBLE_EXE = "%LocalAppData%/Finsemble/app-5.0.0/Finsemble.exe"
+PATH_TO_FINSEMBLE_EXE = "%UserProfile%/Dev/Finsemble/finsemble-seed/Finsemble-win32-x64/Finsemble.exe"
 
 # Path to ChromeDriver. Change this per your local environment.
 # Please note that the ChromeDriver version you need to use is highly dependent on the underlying
 # version of the technology stack (Finsemble <--> Electron <--> Chromium) under test. If there is a version mismatch
 # between ChromeDriver and the application's underlying Chromium, your automated test scripts will fail on startup.
-PATH_TO_CHROMEDRIVER = "%UserProfile%/Dev/Utils/WebDrivers/chromedriver_85/win32/chromedriver.exe"
+PATH_TO_CHROMEDRIVER = "%UserProfile%/Dev/Utils/WebDrivers/chromedriver_102/win32/chromedriver.exe"
 
 
 # Launch Finsemble with Selenium + ChromeDriver hooked into it.
@@ -41,66 +42,76 @@ component_discoverer = FinsembleComponentDiscoverer(driver)
 
 
 # You can use a combination of UI interactions with Selenium (locate & click on elements in the DOM, like a user would)
-# as well as JavaScript calls to the Finsemble API to automate numerous types of functionality. Not every component
-# available to use has access to the `FSBL` API, but we know that the Toolbar does, so locate it and use it to execute
-# JavaScript to call Finsemble API methods.
-print("Locating Finsemble Toolbar with Selenium...")
-toolbar_handle = component_discoverer.get_selenium_handle_of_page_containing_url('toolbar.html')
+# as well as JavaScript calls to the Finsemble API to automate numerous types of functionality.
+#
+# We specifically know that Finsemble's Toolbar has access to the `FSBL` API, so we can hook into the Toolbar with
+# Selenium and then execute JavaScript in order to interact directly with Finsemble's API.
+print("Locating the Finsemble Toolbar with Selenium...")
+toolbar_handle = component_discoverer.get_selenium_handle_of_page_containing_url('Toolbar/index.html')
 driver.switch_to.window(toolbar_handle)
 
 
 # Specifics of how to use Finsemble API calls can be found in our online documentation:
-# https://documentation.chartiq.com/finsemble/
-# You should get comfortable with both the `driver.execute_script()` and `driver.execute_async_script()` methods within
-# Selenium, and how you can return values via callbacks or promises back into your automation code.
-print("Executing JavaScript to create a new workspace via the Finsemble API...")
-driver.execute_async_script(
-    """
-    FSBL.Clients.WorkspaceClient.createWorkspace(arguments[0], arguments[1], (err, res) => { arguments[2](res); });
-    """,
-    "Automated Workspace", {})
+# https://documentation.finsemble.com/docs/reference/APIReference
+print("Creating a new workspace via the Finsemble API...")
+driver.execute_script(
+    "await FSBL.Clients.WorkspaceClient.createWorkspace(arguments[0], arguments[1]);",
+    "Automated Workspace", {}
+)
 
 
-print("Executing JavaScript to launch a Welcome Component...")
-driver.execute_async_script(
-    """
-    FSBL.Clients.LauncherClient.spawn(arguments[0], arguments[1], (err, res) => { arguments[2](res); });
-    """,
-    "Welcome Component", {"addToWorkspace": True})
+print("Launching an example ChartIQ app via the Finsemble API...")
+driver.execute_script(
+    "await FSBL.Clients.LauncherClient.spawn(arguments[0], arguments[1]);",
+    "ChartIQ Example App", {"addToWorkspace": True}
+)
 
 
-# We can use the same `FinsembleComponentDiscoverer` as above to easily find the new Welcome Component that we
+# We can use the same `FinsembleComponentDiscoverer` as above to easily find the new app window that we
 # just launched, and target it with Selenium.
-print("Locating Welcome Component with Selenium...")
-welcome_component_handle = component_discoverer.get_selenium_handle_of_page_containing_url('welcome.html')
-driver.switch_to.window(welcome_component_handle)
+print("Locating the example ChartIQ app window with Selenium...")
+chartiq_app_handle = component_discoverer.get_selenium_handle_of_page_containing_url('Finsemble-SD-ChartIQ/technical-analysis-chart.html')
+driver.switch_to.window(chartiq_app_handle)
 
 
 # All standard Selenium operations that you would perform in a normal web app are available to you even from within
-# Finsemble. You can send keyboard input into a component...
-print("Zooming in & out on the Welcome Component via hotkeys...")
-welcome_component_body = driver.find_element(By.TAG_NAME, 'body')
+# Finsemble. You can send keyboard input into an app's window...
+print("Zooming out & in of the example ChartIQ app via hotkeys...")
+chartiq_window_body = driver.find_element(By.TAG_NAME, 'body')
 for i in range(5):
-    welcome_component_body.send_keys(Keys.CONTROL, Keys.ADD)
+    chartiq_window_body.send_keys(Keys.CONTROL, Keys.SUBTRACT)  # Ctrl -
 for i in range(5):
-    welcome_component_body.send_keys(Keys.CONTROL, Keys.SUBTRACT)
+    chartiq_window_body.send_keys(Keys.CONTROL, Keys.ADD)  # Ctrl +
 
 
-# ... And you can also locate DOM elements to interact with. In a real-world test automation framework, you should
-# adhere to the "page-object-model" and define page objects for each of the components under test. That would also be
-# the ideal place to abstract out the effort of manually switching Selenium focus across multiple components, too.
-print("Clicking the blue 'Launch Docs' button within the Welcome Component...")
-launch_docs_button = driver.find_element(By.ID, 'launchTutorial')
-driver.execute_script("arguments[0].click();", launch_docs_button)
+# ... And you can also locate DOM elements to interact with. In a larger e2e test framework, you should
+# adhere to the "page-object-model" and define page objects for each of the app windows under test.
+print("Clicking the example ChartIQ app's Share button with Selenium...")
+driver.find_element(By.TAG_NAME, 'cq-share-button').click()
+driver.find_element(By.TAG_NAME, 'cq-share-create').click()
+
+
+# Use explicit "wait logic" to pause the e2e execution until the underlying app finishes working...
+# (Better than hard-coded sleeps.)
+def _get_share_url_when_complete() -> str:
+    try:
+        url = driver.find_element(By.CLASS_NAME, 'share-link-div').text
+        return url if url.startswith("http") else ""
+    except:
+        return ""
+
+
+print("Waiting for the example ChartIQ app to finish generating a screenshot...")
+share_link_result = wait_until(lambda: _get_share_url_when_complete(), timeout_in_seconds=10)
+print(f"Your screenshot generated by an e2e script is available at: {share_link_result}")
 
 
 # Be sure to clean up at the end of your automated test runs.
-print("Executing JavaScript to switch back to Default Workspace...")
-driver.execute_async_script(
-    """
-    FSBL.Clients.WorkspaceClient.switchTo({name: arguments[0]}, (err, res) => { arguments[2](res); });
-    """,
-    "Default Workspace", {})
+print("Executing JavaScript to switch back to Default Workspace via the Finsemble API...")
+driver.execute_script(
+    "await FSBL.Clients.WorkspaceClient.switchTo({name: arguments[0]});",
+    "Default Workspace"
+)
 
 print("Closing ChromeDriver...")
 driver.quit()
