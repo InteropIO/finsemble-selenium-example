@@ -67,9 +67,15 @@ class RemoteDebugger:
             # There is a valid Remote Debugger address associated with this Selenium ChromeDriver instance that we
             # can query against.
             return debugger_address
-        except (HTTPError, ConnectionError, JSONDecodeError, ConnectionRefusedError, KeyError, InvalidURL):
+        except (HTTPError, ConnectionError, JSONDecodeError, ConnectionRefusedError, KeyError):
             # Anything that goes wrong with querying or parsing the Selenium command executor URL for data about
             # a ChromeDriver Remote Debugger means that there is no valid Remote Debugger that we can use.
+            return None
+        except InvalidURL:
+            print(
+                f'InvalidURL exception thrown when trying to test the remote debugger address {debugger_address}. '
+                f'Continuing on without remote debugger, but locating specific windows will be slower.'
+            )
             return None
 
     def get_pages(self) -> Optional[dict]:
