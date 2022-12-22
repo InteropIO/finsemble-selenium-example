@@ -1,7 +1,7 @@
 from __future__ import annotations
 import requests
 from json import JSONDecodeError
-from requests.exceptions import HTTPError, ConnectionError
+from requests.exceptions import HTTPError, ConnectionError, InvalidURL
 from typing import TYPE_CHECKING, Optional
 if TYPE_CHECKING:
     from selenium.webdriver.remote.webdriver import WebDriver
@@ -56,14 +56,9 @@ class RemoteDebugger:
         """
 
         try:
-            # noinspection PyProtectedMember
-            selenium_command_executor_url = driver.command_executor._url
-
-            # Query the underlying Selenium server to get details about the remote debugger address.
-            sessions_data = requests.get(f'{selenium_command_executor_url}/sessions').json()
-            debugger_address = sessions_data['value'][0]['capabilities']['goog:chromeOptions']['debuggerAddress']
-            if not debugger_address.startswith('http'):
-                debugger_address = f'http://{debugger_address}'
+            # In `selenium_finsemble_launcher.py` we pass in '--remote-debugging-port=9222' as a flag
+            # when instantiating the Selenium WebDriver instance.
+            debugger_address = 'http://localhost:9222'
 
             # Verify that the reported remote debugger address is actually valid.
             test_request = requests.get(f'{debugger_address}/json')
@@ -72,7 +67,7 @@ class RemoteDebugger:
             # There is a valid Remote Debugger address associated with this Selenium ChromeDriver instance that we
             # can query against.
             return debugger_address
-        except (HTTPError, ConnectionError, JSONDecodeError, ConnectionRefusedError, KeyError):
+        except (HTTPError, ConnectionError, JSONDecodeError, ConnectionRefusedError, KeyError, InvalidURL):
             # Anything that goes wrong with querying or parsing the Selenium command executor URL for data about
             # a ChromeDriver Remote Debugger means that there is no valid Remote Debugger that we can use.
             return None
