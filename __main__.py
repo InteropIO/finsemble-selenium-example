@@ -13,14 +13,14 @@ from selenium.webdriver.common.keys import Keys
 #      via `yarn server`, launch Electron & configure it run your local Finsemble app.
 #   2. Launch "from exe", i.e. given a precompiled installed executable of Finsemble (e.g. Finsemble.exe) that's been
 #      built & configured to use a Finsemble configuration from a server, launch the executable directly.
-PATH_TO_FINSEMBLE_SEED = "%UserProfile%/Dev/Finsemble/finsemble-seed"
+PATH_TO_FINSEMBLE_SEED = "%UserProfile%/Dev/finsemble-seed"
 PATH_TO_FINSEMBLE_EXE = "%UserProfile%/Dev/Finsemble/finsemble-seed/Finsemble-win32-x64/Finsemble.exe"
 
 # Path to ChromeDriver. Change this per your local environment.
 # Please note that the ChromeDriver version you need to use is highly dependent on the underlying
 # version of the technology stack (Finsemble <--> Electron <--> Chromium) under test. If there is a version mismatch
 # between ChromeDriver and the application's underlying Chromium, your automated test scripts will fail on startup.
-PATH_TO_CHROMEDRIVER = "%UserProfile%/Dev/Utils/WebDrivers/chromedriver_102/win32/chromedriver.exe"
+PATH_TO_CHROMEDRIVER = "%UserProfile%/Dev/Utils/WebDrivers/chromedriver_98/win32/chromedriver.exe"
 
 
 # Launch Finsemble with Selenium + ChromeDriver hooked into it.
@@ -47,7 +47,7 @@ component_discoverer = FinsembleComponentDiscoverer(driver)
 # We specifically know that Finsemble's Toolbar has access to the `FSBL` API, so we can hook into the Toolbar with
 # Selenium and then execute JavaScript in order to interact directly with Finsemble's API.
 print("Locating the Finsemble Toolbar with Selenium...")
-toolbar_handle = component_discoverer.get_selenium_handle_of_page_containing_url('Toolbar/index.html')
+toolbar_handle = component_discoverer.get_selenium_handle_of_page_containing_url('Toolbar/toolbar.html')
 driver.switch_to.window(toolbar_handle)
 
 
@@ -70,7 +70,7 @@ driver.execute_script(
 # We can use the same `FinsembleComponentDiscoverer` as above to easily find the new app window that we
 # just launched, and target it with Selenium.
 print("Locating the example ChartIQ app window with Selenium...")
-chartiq_app_handle = component_discoverer.get_selenium_handle_of_page_containing_url('Finsemble-SD-ChartIQ/technical-analysis-chart.html')
+chartiq_app_handle = component_discoverer.get_selenium_handle_of_page_containing_url('chart/technical-analysis-chart.html')
 driver.switch_to.window(chartiq_app_handle)
 
 
